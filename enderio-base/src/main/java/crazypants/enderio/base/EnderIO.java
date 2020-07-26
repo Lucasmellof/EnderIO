@@ -345,10 +345,10 @@ public class EnderIO implements IEnderIOAddon {
 
   private static void startupChecks() {
     FMLCommonHandler.instance().registerCrashCallable(new EnderIOCrashCallable());
-    if (com.mojang.authlib.minecraft.MinecraftProfileTexture.Type.ELYTRA.getClass().toString().equals("force a classload real hard")) {
+    /*if (com.mojang.authlib.minecraft.MinecraftProfileTexture.Type.ELYTRA.getClass().toString().equals("force a classload real hard")) {
       // this will crash some pirated clients.
       // better now than some weird and seemingly random crashes later in the game.
-    }
+    }*/
   }
 
 }
