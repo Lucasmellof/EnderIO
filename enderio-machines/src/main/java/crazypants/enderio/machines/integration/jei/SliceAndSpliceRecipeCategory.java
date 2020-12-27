@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 import crazypants.enderio.base.EnderIO;
 import crazypants.enderio.base.init.ModObject;
-import crazypants.enderio.base.integration.jei.RecipeWrapper;
+import crazypants.enderio.base.integration.jei.RecipeWrapperIRecipe;
 import crazypants.enderio.base.integration.jei.energy.EnergyIngredient;
 import crazypants.enderio.base.integration.jei.energy.EnergyIngredientRenderer;
 import crazypants.enderio.base.recipe.IRecipe;
@@ -43,7 +43,7 @@ public class SliceAndSpliceRecipeCategory extends BlankRecipeCategory<SliceAndSp
 
   // ------------ Recipes
 
-  public static class SliceAndSpliceRecipe extends RecipeWrapper {
+  public static class SliceAndSpliceRecipe extends RecipeWrapperIRecipe {
     public SliceAndSpliceRecipe(IRecipe recipe) {
       super(recipe);
     }
@@ -55,20 +55,20 @@ public class SliceAndSpliceRecipeCategory extends BlankRecipeCategory<SliceAndSp
     }
   }
 
-  public static void register(IModRegistry registry, IGuiHelper guiHelper) {
+  public static void register() {
     // Check JEI recipes are enabled
     if (!PersonalConfig.enableSliceAndSpliceJEIRecipes.get()) {
       return;
     }
 
-    registry.addRecipeCategories(new SliceAndSpliceRecipeCategory(guiHelper));
-    registry.handleRecipes(IRecipe.class, SliceAndSpliceRecipe::new, SliceAndSpliceRecipeCategory.UID);
-    registry.addRecipeClickArea(GuiSliceAndSplice.class, 155, 42, 16, 16, SliceAndSpliceRecipeCategory.UID);
-    registry.addRecipeCategoryCraftingItem(new ItemStack(block_slice_and_splice.getBlockNN()), SliceAndSpliceRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeCategories(new SliceAndSpliceRecipeCategory(MachinesPlugin.iGuiHelper));
+    MachinesPlugin.iModRegistry.handleRecipes(IRecipe.class, SliceAndSpliceRecipe::new, SliceAndSpliceRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeClickArea(GuiSliceAndSplice.class, 155, 42, 16, 16, SliceAndSpliceRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeCategoryCraftingItem(new ItemStack(block_slice_and_splice.getBlockNN()), SliceAndSpliceRecipeCategory.UID);
 
-    registry.addRecipes(SliceAndSpliceRecipeManager.getInstance().getRecipes(), UID);
+    MachinesPlugin.iModRegistry.addRecipes(SliceAndSpliceRecipeManager.getInstance().getRecipes(), UID);
 
-    registry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerSliceAndSplice.class, SliceAndSpliceRecipeCategory.UID, FIRST_RECIPE_SLOT,
+    MachinesPlugin.iModRegistry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerSliceAndSplice.class, SliceAndSpliceRecipeCategory.UID, FIRST_RECIPE_SLOT,
         NUM_RECIPE_SLOT, FIRST_INVENTORY_SLOT, NUM_INVENTORY_SLOT);
   }
 
@@ -85,6 +85,10 @@ public class SliceAndSpliceRecipeCategory extends BlankRecipeCategory<SliceAndSp
   protected final IDrawableAnimated arrow;
 
   public SliceAndSpliceRecipeCategory(IGuiHelper guiHelper) {
+
+    RecipeWrapperIRecipe.setLevelData(SliceAndSpliceRecipe.class, MachinesPlugin.iGuiHelper, 138 - xOff, 4, "textures/blocks/block_slice_and_splice_front.png",
+            "textures/blocks/block_slice_and_splice_front.png");
+
     ResourceLocation backgroundLocation = EnderIO.proxy.getGuiTexture("slice_and_splice");
     background = guiHelper.createDrawable(backgroundLocation, xOff, yOff, 125, 70);
 

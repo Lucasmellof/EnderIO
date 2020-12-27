@@ -18,6 +18,7 @@ import crazypants.enderio.base.item.darksteel.upgrade.energy.EnergyUpgradeManage
 import crazypants.enderio.base.power.PowerHandlerUtil;
 import crazypants.enderio.machines.EnderIOMachines;
 import crazypants.enderio.machines.config.config.SolarConfig;
+import crazypants.enderio.machines.machine.solar.ISolarType;
 import crazypants.enderio.machines.machine.solar.SolarType;
 import crazypants.enderio.machines.machine.solar.TileSolarPanel;
 import net.minecraft.client.entity.AbstractClientPlayer;
@@ -28,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -42,15 +44,21 @@ public class SolarUpgrade extends AbstractUpgrade implements IHasPlayerRenderer 
   public static final @Nonnull NNList<SolarUpgrade> INSTANCES = new NNList<>( //
       new SolarUpgrade(SolarType.SIMPLE), new SolarUpgrade(SolarType.NORMAL), new SolarUpgrade(SolarType.ADVANCED), new SolarUpgrade(SolarType.VIBRANT));
 
+  @SuppressWarnings("unused")
   @SubscribeEvent
   public static void registerDarkSteelUpgrades(@Nonnull RegistryEvent.Register<IDarkSteelUpgrade> event) {
+    if (Loader.isModLoaded("enderioendergy") && false /* TODO: Make textures for the upgrades */) {
+      INSTANCES.add(new SolarUpgrade(SolarType.COMPRESSED));
+      INSTANCES.add(new SolarUpgrade(SolarType.CONCENTRATED));
+      INSTANCES.add(new SolarUpgrade(SolarType.ULTIMATE));
+    }
     INSTANCES.apply(event.getRegistry()::register);
   }
 
   private final @Nonnull SolarType type;
 
   public SolarUpgrade(@Nonnull SolarType type) {
-    super(EnderIOMachines.MODID, UPGRADE_NAME, type.ordinal(), NAME + type.ordinal(), type::getUpgradeLevelCost);
+    super(EnderIOMachines.MODID, UPGRADE_NAME, ISolarType.getMetaFromType(type), NAME + ISolarType.getMetaFromType(type), type::getUpgradeLevelCost);
     this.type = type;
   }
 
@@ -73,7 +81,7 @@ public class SolarUpgrade extends AbstractUpgrade implements IHasPlayerRenderer 
   }
 
   public int getLevel() {
-    return type.ordinal();
+    return ISolarType.getMetaFromType(type);
   }
 
   @Override

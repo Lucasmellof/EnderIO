@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.util.Locale;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -61,7 +62,7 @@ public class RecipeFactory {
   public void placeXSD(String folderName) {
     final ResourceLocation xsdRL = new ResourceLocation(domain, "config/recipes/recipes.xsd");
     final File xsdFL = new File(configDirectory, folderName + "/recipes.xsd");
-    copyCore_dontMakeShittyCoreModsPlease(xsdRL, xsdFL);
+    copyCore_dontMakeShittyCoreModsPlease_thisIncludesShittyMixins(xsdRL, xsdFL);
   }
 
   public void createFolder(String name) {
@@ -91,7 +92,9 @@ public class RecipeFactory {
       try {
         return readStax(target, rootElement, coreFileStream, "core recipe file '" + fileName + "'");
       } catch (XMLStreamException e) {
-        printContentsOnError(getResource(coreRL), coreRL.toString());
+        try (InputStream resource = getResource(coreRL)) {
+          printContentsOnError(resource, coreRL.toString());
+        }
         throw e;
       } catch (InvalidRecipeConfigException irce) {
         irce.setFilename(fileName);
@@ -101,9 +104,15 @@ public class RecipeFactory {
   }
 
   public void copyCore(String fileName) {
+    copyCore(fileName, null);
+  }
+
+  public void copyCore(String fileName, @Nullable String fallback) {
     final ResourceLocation coreRL = new ResourceLocation(domain, ASSETS_FOLDER_CONFIG + fileName);
     final File coreFL = new File(configDirectory, fileName);
-    copyCore_dontMakeShittyCoreModsPlease(coreRL, coreFL);
+    if (!copyCore_dontMakeShittyCoreModsPlease_thisIncludesShittyMixins(coreRL, coreFL) && fallback != null) {
+      copyCore(fallback, null);
+    }
   }
 
   public void createFileUser(String fileName) {
@@ -218,16 +227,17 @@ public class RecipeFactory {
     }
   }
 
-  private void copyCore_dontMakeShittyCoreModsPlease(ResourceLocation resourceLocation, File file) {
+  private boolean copyCore_dontMakeShittyCoreModsPlease_thisIncludesShittyMixins(ResourceLocation resourceLocation, File file) {
     try (InputStream schemaIn = getResource(resourceLocation)) {
       file.setWritable(true, true);
       try (OutputStream schemaOut = new FileOutputStream(file)) {
         IOUtils.copy(schemaIn, schemaOut);
-        // file.setWritable(false, false);
+        return true;
       }
     } catch (IOException e) {
       Log.error("Copying default recipe file from " + resourceLocation + " to " + file + " failed. Reason:");
       e.printStackTrace();
+      return false;
     }
   }
 

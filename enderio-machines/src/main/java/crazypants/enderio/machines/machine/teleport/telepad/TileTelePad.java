@@ -78,7 +78,7 @@ public class TileTelePad extends TileTravelAnchor implements ITelePad, IProgress
   private boolean coordsChanged = false;
 
   @Store
-  private @Nonnull TelepadTarget target = new TelepadTarget(new BlockPos(0, 0, 0), Integer.MIN_VALUE);
+  private @Nonnull TelepadTarget target = new TelepadTarget();
 
   private Queue<Entity> toTeleport = Queues.newArrayDeque();
   private int powerUsed;
@@ -179,9 +179,9 @@ public class TileTelePad extends TileTravelAnchor implements ITelePad, IProgress
   }
 
   @Override
-  protected boolean processTasks(boolean redstoneCheck) {
+  protected void processTasks(boolean redstoneCheck) {
     if (!isMaster()) {
-      return false;
+      return;
     }
 
     if (target.getDimension() == Integer.MIN_VALUE) {
@@ -221,8 +221,6 @@ public class TileTelePad extends TileTravelAnchor implements ITelePad, IProgress
       coordsChanged = false;
       PacketHandler.sendToAllAround(new PacketSetTarget(this, target), this);
     }
-
-    return false;
   }
 
   @Override
@@ -487,7 +485,7 @@ public class TileTelePad extends TileTravelAnchor implements ITelePad, IProgress
       if (m == null) {
         return;
       }
-      if (m.target.getY() <= 0) {
+      if (!m.target.isValid()) {
         // coords have not yet been set or have been set to a very unhealthy location
         return;
       }

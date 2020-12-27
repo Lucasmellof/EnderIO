@@ -10,6 +10,7 @@ import com.enderio.core.api.common.util.IProgressTile;
 import com.enderio.core.common.util.NNList;
 
 import crazypants.enderio.api.capacitor.ICapacitorKey;
+import crazypants.enderio.base.config.config.MachineConfig;
 import crazypants.enderio.base.machine.interfaces.IPoweredTask;
 import crazypants.enderio.base.machine.task.PoweredTask;
 import crazypants.enderio.base.machine.task.PoweredTaskProgress;
@@ -17,7 +18,6 @@ import crazypants.enderio.base.recipe.IMachineRecipe;
 import crazypants.enderio.base.recipe.IMachineRecipe.ResultStack;
 import crazypants.enderio.base.recipe.MachineRecipeInput;
 import crazypants.enderio.base.recipe.MachineRecipeRegistry;
-import crazypants.enderio.base.recipe.RecipeLevel;
 import crazypants.enderio.util.Prep;
 import info.loenwind.autosave.annotations.Storable;
 import info.loenwind.autosave.annotations.Store;
@@ -80,24 +80,23 @@ public abstract class AbstractPoweredTaskEntity extends AbstractPowerConsumerEnt
   }
 
   @Override
-  protected boolean processTasks(boolean redstoneChecksPassed) {
+  protected void processTasks(boolean redstoneChecksPassed) {
 
     if (!redstoneChecksPassed) {
-      return false;
+      return;
     }
 
-    boolean requiresClientSync = false;
     // Process any current items
-    requiresClientSync |= checkProgress(redstoneChecksPassed);
+    checkProgress(redstoneChecksPassed);
 
     if (currentTask != null || !hasPower() || !hasInputStacks()) {
-      return requiresClientSync;
+      return;
     }
 
     if (startFailed) {
       ticksSinceCheckedRecipe++;
-      if (ticksSinceCheckedRecipe < 20) {
-        return false;
+      if (ticksSinceCheckedRecipe < MachineConfig.sleepBetweenFailedTries.get()) {
+        return;
       }
     }
     ticksSinceCheckedRecipe = 0;
@@ -120,13 +119,11 @@ public abstract class AbstractPoweredTaskEntity extends AbstractPowerConsumerEnt
     } else {
       startFailed = true;
     }
-
-    return requiresClientSync;
   }
 
-  protected boolean checkProgress(boolean redstoneChecksPassed) {
+  protected void checkProgress(boolean redstoneChecksPassed) {
     if (currentTask == null || !hasPower()) {
-      return false;
+      return;
     }
     if (redstoneChecksPassed && !currentTask.isComplete()) {
       usePower();
@@ -137,10 +134,10 @@ public abstract class AbstractPoweredTaskEntity extends AbstractPowerConsumerEnt
     // then check if we are done
     if (currentTask.isComplete()) {
       taskComplete();
-      return false;
+      return;
     }
 
-    return false;
+    return;
   }
 
   @Override
@@ -272,10 +269,6 @@ public abstract class AbstractPoweredTaskEntity extends AbstractPowerConsumerEnt
     return cachedNextRecipe;
   }
 
-  protected @Nonnull RecipeLevel getMachineLevel() {
-    return RecipeLevel.IGNORE;
-  }
-
   protected IMachineRecipe canStartNextTask(long nextSeed) {
     IMachineRecipe nextRecipe = getNextRecipe();
     if (nextRecipe == null) {
@@ -378,6 +371,7 @@ public abstract class AbstractPoweredTaskEntity extends AbstractPowerConsumerEnt
     super.setInventorySlotContents(slot, contents);
     if (slotDefinition.isInputSlot(slot)) {
       cachedNextRecipe = null;
+      startFailed = false; // skip re-check delay, see #ticksSinceCheckedRecipe
     }
   }
 

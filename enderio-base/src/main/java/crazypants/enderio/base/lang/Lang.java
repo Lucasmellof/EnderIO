@@ -223,6 +223,18 @@ public enum Lang implements ILang {
 
   GUI_ZOOM_STORED(".keybind.zoom.stored"),
 
+  JEI_NOTSIMPLE(".jei.notSimple"),
+  JEI_NOTNORMAL(".jei.notNormal"),
+
+  GUI_TRAVEL_SKIP_LOCKED(".gui.travel_accessable.skip.locked"),
+  GUI_TRAVEL_SKIP_PRIVATE(".gui.travel_accessable.skip.private"),
+  GUI_TRAVEL_SKIP_OBSTRUCTED(".gui.travel_accessable.skip.obstructed"),
+  GUI_TRAVEL_UNAUTHORIZED(".gui.travel_accessable.unauthorized"),
+  GUI_TRAVEL_OUT_OF_RANGE(".gui.travel_accessable.outofrange"),
+  GUI_TRAVEL_INVALID_TARGET(".gui.travel_accessable.invalidtarget"),
+
+  GUI_TOO_MANY_LEVELS(".gui.too_many_levels"),
+
   ;
 
   private final @Nonnull String key;

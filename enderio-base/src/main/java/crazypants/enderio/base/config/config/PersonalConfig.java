@@ -35,7 +35,7 @@ public final class PersonalConfig {
           + "1 - Vertical icon bar in bottom right\n" + "2 - Old-style group of icons in bottom right")
       .setRange(0, 2);
 
-  // Sounds
+  // SFX
 
   public static final IValue<Boolean> machineSoundsEnabled = F.make("machineSoundsEnabled", true, //
       "If true, machines will make sounds.");
@@ -43,13 +43,8 @@ public final class PersonalConfig {
   public static final IValue<Float> machineSoundsVolume = F.make("machineSoundsVolume", 1F, //
       "Volume of machine sounds.");
 
-  // Tooltips
-
-  public static final IValue<Boolean> tooltipsAddFuelToFluidContainers = F.make("tooltipsAddFuelToFluidContainers", true, //
-      "If true, adds energy value and burn time tooltips to fluid containers with liquid fuel.");
-
-  public static final IValue<Boolean> tooltipsAddFurnaceFuel = F.make("tooltipsAddFurnaceFuel", true, //
-      "If true, adds burn duration tooltips to furnace fuels.");
+  public static final IValue<Boolean> machineParticlesEnabled = F.make("machineParticlesEnabled", true, //
+      "If true, machines will make particles. This has no effect on entities and important particles like Concussion TNT's explosion.");
 
   // Colors
 
@@ -69,6 +64,9 @@ public final class PersonalConfig {
 
   public static final IValue<Boolean> celebrateReformation = F.make("celebrateReformation", true, //
       "Celebrate Reformation Day?").sync(); // HL: yes, it's actually Halloween, but I'm a troll ;)
+
+  public static final IValue<Boolean> celebrateNewYear = F.make("celebrateNewYear", true, //
+      "Celebrate (western calendar) New Year?").sync();
 
   // GUI Branding
 
@@ -96,6 +94,9 @@ public final class PersonalConfig {
   public static final IValue<Boolean> animatedGears = F.make("animatedGears", true, //
       "Should the Gear item be animated?");
 
+  public static final IValue<Boolean> animatedYeta = F.make("animatedYeta", true, //
+      "Should the Yeta wrench rotate in Third-person view?");
+
   // Item Hiding
 
   public static final IValueFactory H = F.section(".hiding");
@@ -115,14 +116,20 @@ public final class PersonalConfig {
 
   public static final IValue<LootConfig> lootGeneration = L.make("generation", LootConfig.VANILLA, //
       "Selects which loot table configurations are injected for dungeon loot. "
-          + "Possible values are VANILLA (inject standard loot tables from the mod jar and/or world folder), "
-          + "DEVELOPMENT (inject programmatic tables used in development) and DISABLED (don't add any loot tables). "
+          + "Possible values are:\n- VANILLA (inject standard loot tables from the mod jar and/or world folder), "
+          + "\\n- DEVELOPMENT (inject programmatic tables used in development) and \\n- DISABLED (don't add any loot tables).\\n"
           + "Please don't use DEVELOPMENT, those tables are only templates we use to create the real ones.")
       .sync();
 
   // Tooltips
 
   public static final IValueFactory T = F.section(".tooltips");
+
+  public static final IValue<Boolean> tooltipsAddFuelToFluidContainers = T.make("enableFluidContainerFuelTooltip", true, //
+      "If true, adds energy value and burn time tooltips to fluid containers with liquid fuel.");
+
+  public static final IValue<Boolean> tooltipsAddFurnaceFuel = T.make("enableFurnaceFuelTooltip", true, //
+      "If true, adds burn duration tooltips to furnace fuels.");
 
   public enum TooltipPaintEnum implements Supplier<Boolean> {
     NEVER {

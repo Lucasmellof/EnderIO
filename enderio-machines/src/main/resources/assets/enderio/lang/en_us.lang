@@ -273,6 +273,9 @@ tile.block_solar_panel.simple.name=Simple Photovoltaic Cell
 tile.block_solar_panel.name=Photovoltaic Cell
 tile.block_solar_panel.advanced.name=Advanced Photovoltaic Cell
 tile.block_solar_panel.vibrant.name=Vibrant Photovoltaic Cell
+tile.block_solar_panel.compressed.name=Crystalline Photovoltaic Cell
+tile.block_solar_panel.concentrated.name=Melodic Photovoltaic Cell
+tile.block_solar_panel.ultimate.name=Stellar Photovoltaic Cell
 tile.block_solar_panel.tooltip.common.line1=Solar Power!
 tile.block_solar_panel.tooltip.detailed.line1=Produces power during daylight hours
 tile.block_solar_panel.tooltip.detailed.line2=Must have a clear line of sight to the sky
@@ -414,8 +417,6 @@ enderio.jei.stirling_generator.range.line1=Actual power generated depends
 enderio.jei.stirling_generator.range.line2=on capacitor and generator model.
 enderio.jei.stirling_generator.notSimple.line1=This fuel cannot be used in
 enderio.jei.stirling_generator.notSimple.line2=Simple Stirling generator
-enderio.jei.alloy_smelter.notSimple.line1=This recipe cannot be made in
-enderio.jei.alloy_smelter.notSimple.line2=Simple Alloy Smelter
 enderio.jei.grinding_ball.main.line1=Adds a chance to double all outputs
 enderio.jei.grinding_ball.bonus.line1=Increases the chances of any random outputs, but will not bring them above 100%%
 enderio.jei.grinding_ball.bonus.line2=Calculated as original chance * bonus chance. 
@@ -435,6 +436,15 @@ enderio.darksteel.upgrade.solar_2.tooltip.detailed.line1=Generates power from th
 
 enderio.darksteel.upgrade.solar_3.name=Solar III
 enderio.darksteel.upgrade.solar_3.tooltip.detailed.line1=Generates power from the sun.
+
+enderio.darksteel.upgrade.solar_4.name=Solar IV
+enderio.darksteel.upgrade.solar_4.tooltip.detailed.line1=Generates power from the sun.
+
+enderio.darksteel.upgrade.solar_5.name=Solar V
+enderio.darksteel.upgrade.solar_5.tooltip.detailed.line1=Generates power from the sun.
+
+enderio.darksteel.upgrade.solar_6.name=Solar VI
+enderio.darksteel.upgrade.solar_6.tooltip.detailed.line1=Generates power from the sun.
 
 enderio.config.capacitor=Capacitor Values
 enderio.config.client=Client Settings

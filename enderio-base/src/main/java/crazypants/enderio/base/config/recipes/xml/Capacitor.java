@@ -12,6 +12,7 @@ import crazypants.enderio.base.Log;
 import crazypants.enderio.base.capacitor.CapacitorKeyRegistry;
 import crazypants.enderio.base.config.recipes.InvalidRecipeConfigException;
 import crazypants.enderio.base.config.recipes.StaxFactory;
+import crazypants.enderio.base.recipe.RecipeLevel;
 import net.minecraft.util.ResourceLocation;
 
 public class Capacitor extends AbstractConditional {
@@ -72,12 +73,14 @@ public class Capacitor extends AbstractConditional {
 
   @SuppressWarnings("null")
   @Override
-  public void register(@Nonnull String recipeName) {
+  public void register(@Nonnull String recipeName, @Nonnull RecipeLevel recipeLevel) {
     if (!disabled && valid && active) {
       Log.debug("Registering XML recipe '" + getName() + "'");
 
+      // TODO 1.16: we need to know if this is the base value (setValue) or an override (setOverride) here. Alternatively we can remove the registry's override
+      // funtionality and rely on re-registering core values. That's what other registries will be doing. It's just that we always need default values, unlike
+      // real recipe registries.
       CapacitorKeyRegistry.setValue(key.get(), base, scaler.get().getScaler(), scaler.get().getScalerString());
-
     } else {
       Log.debug("Skipping XML recipe '" + getName() + "' (valid=" + valid + ", active=" + active + ", required=" + required + ", disabled=" + disabled + ")");
     }

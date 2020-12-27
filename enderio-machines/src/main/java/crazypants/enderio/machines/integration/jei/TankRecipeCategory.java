@@ -12,8 +12,11 @@ import com.enderio.core.common.util.NNList;
 import crazypants.enderio.base.EnderIO;
 import crazypants.enderio.base.Log;
 import crazypants.enderio.base.fluid.Fluids;
+import crazypants.enderio.base.integration.jei.RecipeWrapperBase;
+import crazypants.enderio.base.integration.jei.RecipeWrapperIMachineRecipe;
 import crazypants.enderio.base.recipe.IMachineRecipe;
 import crazypants.enderio.base.recipe.MachineRecipeRegistry;
+import crazypants.enderio.base.recipe.RecipeLevel;
 import crazypants.enderio.base.recipe.tank.TankMachineRecipe;
 import crazypants.enderio.base.xp.XpUtil;
 import crazypants.enderio.machines.EnderIOMachines;
@@ -34,8 +37,6 @@ import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.BlankRecipeCategory;
-import mezz.jei.api.recipe.BlankRecipeWrapper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Enchantments;
@@ -55,26 +56,27 @@ public class TankRecipeCategory extends BlankRecipeCategory<TankRecipeCategory.T
 
   // ------------ Recipes
 
-  public static abstract class TankRecipeWrapper extends BlankRecipeWrapper {
+  public static abstract class TankRecipeWrapper<E extends IMachineRecipe> extends RecipeWrapperIMachineRecipe<E> {
+
+    public TankRecipeWrapper(E recipe) {
+      super(recipe);
+    }
 
     public abstract String getUUID();
 
   }
 
-  public static class TankRecipeWrapperSimple extends TankRecipeWrapper {
+  public static class TankRecipeWrapperSimple extends TankRecipeWrapper<IMachineRecipe> {
 
     private final FluidStack fluidInput, fluidOutput;
     private final ItemStack itemInput, itemOutput;
 
     public TankRecipeWrapperSimple(FluidStack fluidInput, FluidStack fluidOutput, ItemStack itemInput, ItemStack itemOutput) {
+      super(null);
       this.fluidInput = fluidInput;
       this.fluidOutput = fluidOutput;
       this.itemInput = itemInput;
       this.itemOutput = itemOutput;
-    }
-
-    @Override
-    public void drawInfo(@Nonnull Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
     }
 
     public void setInfoData(Map<Integer, ? extends IGuiIngredient<ItemStack>> ings) {
@@ -101,14 +103,16 @@ public class TankRecipeCategory extends BlankRecipeCategory<TankRecipeCategory.T
       return null;
     }
 
+    @Override
+    protected RecipeLevel getRecipeLevel() {
+      return RecipeLevel.IGNORE;
+    }
   }
 
-  public static class TankRecipeWrapperRecipe extends TankRecipeWrapper {
-
-    private final @Nonnull TankMachineRecipe recipe;
+  public static class TankRecipeWrapperRecipe extends TankRecipeWrapper<TankMachineRecipe> {
 
     public TankRecipeWrapperRecipe(@Nonnull TankMachineRecipe recipe) {
-      this.recipe = recipe;
+      super(recipe);
     }
 
     @Override
@@ -124,8 +128,7 @@ public class TankRecipeCategory extends BlankRecipeCategory<TankRecipeCategory.T
           fluids.add(copy);
         }
       } else {
-        fluids.add(recipe.getLogic().convertFluidResult(recipe.isFilling(), recipe.getInput().getItemStack(), fluid, fluid,
-            recipe.getOutput().getItemStack()));
+        fluids.add(recipe.getLogic().convertFluidResult(recipe.isFilling(), recipe.getInput().getItemStack(), fluid, fluid, recipe.getOutput().getItemStack()));
       }
       if (recipe.isFilling()) {
         ingredients.setInputLists(FluidStack.class, new NNList<List<FluidStack>>(fluids));
@@ -145,22 +148,27 @@ public class TankRecipeCategory extends BlankRecipeCategory<TankRecipeCategory.T
 
   // -------------------------------------
 
-  public static void register(IModRegistry registry, IGuiHelper guiHelper) {
+  public static void register() {
     // If all tank recipes are disabled, don't register the plugin
     if (!PersonalConfig.enableTankFluidInOutJEIRecipes.get() && !PersonalConfig.enableTankMendingJEIRecipes.get()) {
       return;
     }
 
-    registry.addRecipeCategories(new TankRecipeCategory(guiHelper));
-    registry.addRecipeCategoryCraftingItem(new ItemStack(block_tank.getBlockNN(), 1, 0), TankRecipeCategory.UID);
-    registry.addRecipeCategoryCraftingItem(new ItemStack(block_tank.getBlockNN(), 1, 1), TankRecipeCategory.UID);
-    registry.addRecipeClickArea(GuiTank.class, 155, 42, 16, 16, TankRecipeCategory.UID);
+    RecipeWrapperBase.setLevelData(TankRecipeWrapperSimple.class, MachinesPlugin.iGuiHelper, 140 - xOff, 40 - yOff - 5, "textures/blocks/block_tank.png",
+        "textures/blocks/block_tank.png");
+    RecipeWrapperBase.setLevelData(TankRecipeWrapperRecipe.class, MachinesPlugin.iGuiHelper, 140 - xOff, 40 - yOff - 5, "textures/blocks/block_tank.png",
+        "textures/blocks/block_tank.png");
+
+    MachinesPlugin.iModRegistry.addRecipeCategories(new TankRecipeCategory(MachinesPlugin.iGuiHelper));
+    MachinesPlugin.iModRegistry.addRecipeCategoryCraftingItem(new ItemStack(block_tank.getBlockNN(), 1, 0), TankRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeCategoryCraftingItem(new ItemStack(block_tank.getBlockNN(), 1, 1), TankRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeClickArea(GuiTank.class, 155, 42, 16, 16, TankRecipeCategory.UID);
 
     long start = System.nanoTime();
 
-    List<ItemStack> validItems = registry.getIngredientRegistry().getIngredients(ItemStack.class);
+    List<ItemStack> validItems = MachinesPlugin.iModRegistry.getIngredientRegistry().getIngredients(ItemStack.class);
 
-    List<TankRecipeWrapper> result = new ArrayList<TankRecipeWrapper>();
+    List<TankRecipeWrapper<?>> result = new ArrayList<>();
 
     for (IMachineRecipe recipe : MachineRecipeRegistry.instance.getRecipesForMachine(MachineRecipeRegistry.TANK_EMPTYING).values()) {
       if (recipe instanceof TankMachineRecipe) {
@@ -237,10 +245,10 @@ public class TankRecipeCategory extends BlankRecipeCategory<TankRecipeCategory.T
     }
 
     long end = System.nanoTime();
-    registry.addRecipes(result, UID);
+    MachinesPlugin.iModRegistry.addRecipes(result, UID);
 
     // TODO: Create transfer handler that knows about liquids
-    registry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerTank.class, TankRecipeCategory.UID, 0, 2, 3, 4 * 9);
+    MachinesPlugin.iModRegistry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerTank.class, TankRecipeCategory.UID, 0, 2, 3, 4 * 9);
 
     Log.info(String.format("TankRecipeCategory: Added %d tank recipes to JEI in %.3f seconds.", result.size(), (end - start) / 1000000000d));
   }
@@ -254,8 +262,8 @@ public class TankRecipeCategory extends BlankRecipeCategory<TankRecipeCategory.T
 
   // Offsets from full size gui, makes it much easier to get the location
   // correct
-  private int xOff = 15;
-  private int yOff = 20;
+  private static int xOff = 15;
+  private static int yOff = 20;
 
   @Nonnull
   private final IDrawable background;

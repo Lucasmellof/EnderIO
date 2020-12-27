@@ -12,6 +12,7 @@ import crazypants.enderio.base.Log;
 import crazypants.enderio.base.config.recipes.InvalidRecipeConfigException;
 import crazypants.enderio.base.config.recipes.StaxFactory;
 import crazypants.enderio.base.integration.tic.TicProxy;
+import crazypants.enderio.base.recipe.RecipeLevel;
 import crazypants.enderio.util.Prep;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
@@ -66,7 +67,7 @@ public class Smelting extends AbstractCrafting {
   }
 
   @Override
-  public void register(@Nonnull String recipeName) {
+  public void register(@Nonnull String recipeName, @Nonnull RecipeLevel recipeLevel) {
     if (isValid() && isActive()) {
       if (vanilla) {
         final ItemStack result = getOutput().getItemStack();
@@ -77,7 +78,7 @@ public class Smelting extends AbstractCrafting {
             final ItemStack smeltingResult = FurnaceRecipes.instance().getSmeltingResult(stack);
             if (Prep.isValid(smeltingResult)) {
               if (result.getItem() != smeltingResult.getItem() || result.getCount() != smeltingResult.getCount()) {
-                Log.error("Cannot add smelting recipe " + recipeName + " (" + stack + " => " + result + ") because another mod already has registered a recipe "
+                Log.info("Cannot add smelting recipe " + recipeName + " (" + stack + " => " + result + ") because another mod already has registered a recipe "
                     + stack + " => " + smeltingResult + ".");
               } else {
                 Log.debug(
@@ -85,6 +86,10 @@ public class Smelting extends AbstractCrafting {
               }
             } else {
               GameRegistry.addSmelting(stack, result, exp);
+              if (recipeLevel != RecipeLevel.IGNORE) {
+                Log.warn("Ignoring recipe level " + recipeLevel + " configured for vanilla smelting recipe '" + recipeName
+                    + "'---the vanilla furcnace doesn't have (or support) levels");
+              }
             }
           }
         });

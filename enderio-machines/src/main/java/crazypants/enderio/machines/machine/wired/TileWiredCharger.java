@@ -12,6 +12,7 @@ import crazypants.enderio.base.machine.modes.IoMode;
 import crazypants.enderio.base.paint.IPaintable;
 import crazypants.enderio.base.power.PowerHandlerUtil;
 import crazypants.enderio.base.power.forge.tile.ILegacyPoweredTile;
+import crazypants.enderio.base.recipe.RecipeLevel;
 import crazypants.enderio.machines.capacitor.CapacitorKey;
 import crazypants.enderio.util.Prep;
 import info.loenwind.autosave.annotations.Storable;
@@ -47,6 +48,11 @@ public class TileWiredCharger extends AbstractPowerConsumerEntity implements ILe
     this(new SlotDefinition(1, 1, 1), CapacitorKey.WIRED_POWER_INTAKE, CapacitorKey.WIRED_POWER_BUFFER);
   }
 
+  @Override
+  protected @Nonnull RecipeLevel getMachineLevel() {
+    return RecipeLevel.NORMAL;
+  }
+
   @Storable
   public static class Enhanced extends TileWiredCharger {
 
@@ -59,6 +65,11 @@ public class TileWiredCharger extends AbstractPowerConsumerEntity implements ILe
       return (faceHit != EnumFacing.UP || mode == IoMode.NONE) && super.supportsMode(faceHit, mode);
     }
 
+    @Override
+    protected @Nonnull RecipeLevel getMachineLevel() {
+      return RecipeLevel.ADVANCED;
+    }
+
   }
 
   @Storable
@@ -67,6 +78,11 @@ public class TileWiredCharger extends AbstractPowerConsumerEntity implements ILe
     public Simple() {
       super(new SlotDefinition(1, 1, 0), SIMPLE_WIRED_POWER_INTAKE, SIMPLE_WIRED_POWER_BUFFER, SIMPLE_WIRED_POWER_USE);
       setEnergyLoss(SIMPLE_WIRED_POWER_LOSS);
+    }
+
+    @Override
+    protected @Nonnull RecipeLevel getMachineLevel() {
+      return RecipeLevel.SIMPLE;
     }
 
   }
@@ -91,9 +107,9 @@ public class TileWiredCharger extends AbstractPowerConsumerEntity implements ILe
   }
 
   @Override
-  protected boolean processTasks(boolean redstoneCheck) {
+  protected void processTasks(boolean redstoneCheck) {
     if (!redstoneCheck || getEnergyStored() <= 0) {
-      return false;
+      return;
     }
 
     ItemStack stack = getStackInSlot(getSlotDefinition().minInputSlot);
@@ -106,7 +122,7 @@ public class TileWiredCharger extends AbstractPowerConsumerEntity implements ILe
           if (used > 0) {
             usePower(used);
             progress = chargable.getEnergyStored() / (float) chargable.getMaxEnergyStored();
-            return false;
+            return;
           }
         }
         // not charged
@@ -118,7 +134,6 @@ public class TileWiredCharger extends AbstractPowerConsumerEntity implements ILe
     }
 
     progress = 0f;
-    return false;
   }
 
   @Store(NBTAction.CLIENT)

@@ -10,6 +10,8 @@ import javax.annotation.Nonnull;
 import com.enderio.core.common.util.NNList;
 
 import crazypants.enderio.base.EnderIO;
+import crazypants.enderio.base.integration.jei.RecipeWrapperBase;
+import crazypants.enderio.base.integration.jei.RecipeWrapperIMachineRecipe;
 import crazypants.enderio.base.integration.jei.energy.EnergyIngredient;
 import crazypants.enderio.base.integration.jei.energy.EnergyIngredientRenderer;
 import crazypants.enderio.base.recipe.MachineRecipeRegistry;
@@ -31,7 +33,6 @@ import mezz.jei.api.gui.IGuiItemStackGroup;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.BlankRecipeCategory;
-import mezz.jei.api.recipe.BlankRecipeWrapper;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocus.Mode;
 import net.minecraft.client.Minecraft;
@@ -53,12 +54,10 @@ public class SoulBinderRecipeCategory extends BlankRecipeCategory<SoulBinderReci
 
   // ------------ Recipes
 
-  public static class SoulBinderRecipeWrapper extends BlankRecipeWrapper {
-
-    private ISoulBinderRecipe recipe;
+  public static class SoulBinderRecipeWrapper extends RecipeWrapperIMachineRecipe<ISoulBinderRecipe> {
 
     public SoulBinderRecipeWrapper(ISoulBinderRecipe recipe) {
-      this.recipe = recipe;
+      super(recipe);
     }
 
     @Override
@@ -104,33 +103,37 @@ public class SoulBinderRecipeCategory extends BlankRecipeCategory<SoulBinderReci
       String str = Lang.GUI_VANILLA_REPAIR_COST.get(cost);
       minecraft.fontRenderer.drawString(str, 6, 26, 0x80FF20, true);
       GlStateManager.color(1, 1, 1, 1);
+      super.drawInfo(minecraft, recipeWidth, recipeHeight, mouseX, mouseY);
     }
+
   }
 
   @SuppressWarnings("null")
-  public static void register(IModRegistry registry, IGuiHelper guiHelper) {
+  public static void register() {
     // Check JEI Recipes are enabled
     if (!PersonalConfig.enableSoulBinderJEIRecipes.get()) {
       return;
     }
 
-    registry.addRecipeCategories(new SoulBinderRecipeCategory(guiHelper));
-    registry.handleRecipes(ISoulBinderRecipe.class, SoulBinderRecipeWrapper::new, SoulBinderRecipeCategory.UID);
-    registry.addRecipeClickArea(GuiSoulBinder.class, 155, 42, 16, 16, SoulBinderRecipeCategory.UID);
-    registry.addRecipeCategoryCraftingItem(new ItemStack(block_soul_binder.getBlockNN()), SoulBinderRecipeCategory.UID);
+    RecipeWrapperBase.setLevelData(SoulBinderRecipeWrapper.class, MachinesPlugin.iGuiHelper, 129 - xOff, 72 - yOff - 5, null, null);
 
-    registry.addRecipes(MachineRecipeRegistry.instance.getRecipesForMachine(MachineRecipeRegistry.SOULBINDER).values().stream()
+    MachinesPlugin.iModRegistry.addRecipeCategories(new SoulBinderRecipeCategory(MachinesPlugin.iGuiHelper));
+    MachinesPlugin.iModRegistry.handleRecipes(ISoulBinderRecipe.class, SoulBinderRecipeWrapper::new, SoulBinderRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeClickArea(GuiSoulBinder.class, 155, 42, 16, 16, SoulBinderRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeCategoryCraftingItem(new ItemStack(block_soul_binder.getBlockNN()), SoulBinderRecipeCategory.UID);
+
+    MachinesPlugin.iModRegistry.addRecipes(MachineRecipeRegistry.instance.getRecipesForMachine(MachineRecipeRegistry.SOULBINDER).values().stream()
         .filter(r -> r instanceof ISoulBinderRecipe).collect(Collectors.toList()), UID);
 
-    registry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerSoulBinder.class, SoulBinderRecipeCategory.UID, FIRST_RECIPE_SLOT, NUM_RECIPE_SLOT,
+    MachinesPlugin.iModRegistry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerSoulBinder.class, SoulBinderRecipeCategory.UID, FIRST_RECIPE_SLOT, NUM_RECIPE_SLOT,
         FIRST_INVENTORY_SLOT, NUM_INVENTORY_SLOT);
   }
 
   // ------------ Category
 
   // Offsets from full size gui, makes it much easier to get the location correct
-  private int xOff = 34;
-  private int yOff = 28;
+  private static int xOff = 34;
+  private static int yOff = 28;
 
   private final @Nonnull IDrawable background;
   private final @Nonnull IDrawableAnimated arrow;

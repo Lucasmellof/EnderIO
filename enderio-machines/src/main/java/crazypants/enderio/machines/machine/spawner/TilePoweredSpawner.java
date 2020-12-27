@@ -9,6 +9,7 @@ import com.enderio.core.client.render.BoundingBox;
 import com.enderio.core.common.util.NNList;
 import com.enderio.core.common.vecmath.Vector4f;
 
+import crazypants.enderio.base.config.config.PersonalConfig;
 import crazypants.enderio.base.init.ModObject;
 import crazypants.enderio.base.machine.baselegacy.AbstractPoweredTaskEntity;
 import crazypants.enderio.base.machine.baselegacy.SlotDefinition;
@@ -209,7 +210,7 @@ public class TilePoweredSpawner extends AbstractPoweredTaskEntity
 
   @Override
   protected void updateEntityClient() {
-    if (isActive()) {
+    if (PersonalConfig.machineParticlesEnabled.get() && isActive()) {
       double x = getPos().getX() + world.rand.nextFloat();
       double y = getPos().getY() + world.rand.nextFloat();
       double z = getPos().getZ() + world.rand.nextFloat();
@@ -241,7 +242,7 @@ public class TilePoweredSpawner extends AbstractPoweredTaskEntity
     }
     ticksDelay /= SPAWNER_SPEEDUP.getFloat(getCapacitorData());
     int powerPerTick = getPowerUsePerTick();
-    res.setRequiredEnergy(powerPerTick * ticksDelay);
+    res.setRequiredEnergy(powerPerTick * Math.max(1, ticksDelay));
     return res;
   }
 

@@ -1,7 +1,5 @@
 package crazypants.enderio.machines.machine.soul;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -18,7 +16,6 @@ import crazypants.enderio.base.paint.IPaintable;
 import crazypants.enderio.base.recipe.IMachineRecipe;
 import crazypants.enderio.base.recipe.MachineRecipeInput;
 import crazypants.enderio.base.recipe.MachineRecipeRegistry;
-import crazypants.enderio.base.recipe.RecipeLevel;
 import crazypants.enderio.base.recipe.soul.ISoulBinderRecipe;
 import crazypants.enderio.base.xp.ExperienceContainer;
 import crazypants.enderio.base.xp.IHaveExperience;
@@ -94,7 +91,7 @@ public class TileSoulBinder extends AbstractPoweredTaskEntity implements IHaveEx
   }
 
   @Override
-  protected boolean processTasks(boolean redstoneChecksPassed) {
+  protected void processTasks(boolean redstoneChecksPassed) {
     if (xpCont.isDirty()) {
       PacketHandler.sendToAllAround(new PacketExperienceContainer(this), this);
       xpCont.setDirty(false);
@@ -103,7 +100,7 @@ public class TileSoulBinder extends AbstractPoweredTaskEntity implements IHaveEx
       // we have a very smooth block animation, so all clients need very detailed progress data
       PacketHandler.INSTANCE.sendToAllAround(getProgressPacket(), this);
     }
-    return super.processTasks(redstoneChecksPassed);
+    super.processTasks(redstoneChecksPassed);
   }
 
   @Override
@@ -137,7 +134,7 @@ public class TileSoulBinder extends AbstractPoweredTaskEntity implements IHaveEx
     if (!(nextRecipe instanceof ISoulBinderRecipe)) {
       return 0;
     }
-    return ((ISoulBinderRecipe) nextRecipe).getExperienceRequired() - getContainer().getExperienceTotal();
+    return ((ISoulBinderRecipe) nextRecipe).getExperienceRequired() - getContainer().getExperienceTotalIntLimited();
   }
 
   public int getCurrentlyRequiredLevel() {
@@ -173,20 +170,11 @@ public class TileSoulBinder extends AbstractPoweredTaskEntity implements IHaveEx
     MachineRecipeInput newInput = new MachineRecipeInput(slot, item);
     int otherSlot = slot == 0 ? 1 : 0;
     if (Prep.isInvalid(getStackInSlot(otherSlot))) {
-      List<IMachineRecipe> recipes = MachineRecipeRegistry.instance.getRecipesForInput(RecipeLevel.IGNORE, getMachineName(), newInput);
-      if (recipes.isEmpty()) {
-        return false;
-      }
-      for (IMachineRecipe rec : recipes) {
-        if (rec != null && rec.isValidInput(RecipeLevel.IGNORE, newInput)) {
-          return true;
-        }
-      }
+      return MachineRecipeRegistry.instance.getRecipeForInput(getMachineLevel(), getMachineName(), newInput) != null;
     } else {
       NNList<MachineRecipeInput> inputs = new NNList<>(newInput, new MachineRecipeInput(otherSlot, getStackInSlot(otherSlot)));
-      return MachineRecipeRegistry.instance.getRecipeForInputs(RecipeLevel.IGNORE, getMachineName(), inputs) != null;
+      return MachineRecipeRegistry.instance.getRecipeForInputs(getMachineLevel(), getMachineName(), inputs) != null;
     }
-    return false;
   }
 
   @Override
@@ -229,10 +217,10 @@ public class TileSoulBinder extends AbstractPoweredTaskEntity implements IHaveEx
     if (currentTask == null) {
       IMachineRecipe nextRecipe = getNextRecipe();
       if (nextRecipe instanceof ISoulBinderRecipe) {
-        return Math.max(0, getContainer().getExperienceTotal() - ((ISoulBinderRecipe) nextRecipe).getExperienceRequired());
+        return Math.max(0, getContainer().getExperienceTotalIntLimited() - ((ISoulBinderRecipe) nextRecipe).getExperienceRequired());
       }
     }
-    return getContainer().getExperienceTotal();
+    return getContainer().getExperienceTotalIntLimited();
   }
 
   @Override

@@ -5,7 +5,7 @@ import java.awt.Rectangle;
 import javax.annotation.Nonnull;
 
 import crazypants.enderio.base.EnderIO;
-import crazypants.enderio.base.integration.jei.RecipeWrapper;
+import crazypants.enderio.base.integration.jei.RecipeWrapperIRecipe;
 import crazypants.enderio.base.integration.jei.energy.EnergyIngredient;
 import crazypants.enderio.base.integration.jei.energy.EnergyIngredientRenderer;
 import crazypants.enderio.base.recipe.IRecipe;
@@ -43,7 +43,7 @@ public class VatRecipeCategory extends BlankRecipeCategory<VatRecipeCategory.Vat
 
   // ------------ Recipes
 
-  public static class VatRecipeWrapper extends RecipeWrapper {
+  public static class VatRecipeWrapper extends RecipeWrapperIRecipe {
 
     private IRecipeLayout currentLayout;
 
@@ -64,7 +64,7 @@ public class VatRecipeCategory extends BlankRecipeCategory<VatRecipeCategory.Vat
 
     @Override
     public void drawInfo(@Nonnull Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
-      // This is early everytime the recipe is drawn, so re-calc based on the active items here
+      // This is early every time the recipe is drawn, so re-calc based on the active items here
       if (currentLayout != null) {
         final IGuiItemStackGroup guiItemStacks = currentLayout.getItemStacks();
         final IGuiFluidStackGroup fluidStacks = currentLayout.getFluidStacks();
@@ -81,24 +81,27 @@ public class VatRecipeCategory extends BlankRecipeCategory<VatRecipeCategory.Vat
           }
         }
       }
+      super.drawInfo(minecraft, recipeWidth, recipeHeight, mouseX, mouseY);
     }
 
   }
 
-  public static void register(IModRegistry registry, IGuiHelper guiHelper) {
+  public static void register() {
     // Check JEI recipes are enabled
     if (!PersonalConfig.enableVatJEIRecipes.get()) {
       return;
     }
 
-    registry.addRecipeCategories(new VatRecipeCategory(guiHelper));
-    registry.handleRecipes(IRecipe.class, VatRecipeWrapper::new, VatRecipeCategory.UID);
-    registry.addRecipeClickArea(GuiVat.class, 155, 42, 16, 16, VatRecipeCategory.UID);
-    registry.addRecipeCategoryCraftingItem(new ItemStack(block_vat.getBlockNN()), VatRecipeCategory.UID);
+    RecipeWrapperIRecipe.setLevelData(VatRecipeWrapper.class, MachinesPlugin.iGuiHelper, -1, 73 - yOff - 5, null, null);
 
-    registry.addRecipes(VatRecipeManager.getInstance().getRecipes(), UID);
+    MachinesPlugin.iModRegistry.addRecipeCategories(new VatRecipeCategory(MachinesPlugin.iGuiHelper));
+    MachinesPlugin.iModRegistry.handleRecipes(IRecipe.class, VatRecipeWrapper::new, VatRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeClickArea(GuiVat.class, 155, 42, 16, 16, VatRecipeCategory.UID);
+    MachinesPlugin.iModRegistry.addRecipeCategoryCraftingItem(new ItemStack(block_vat.getBlockNN()), VatRecipeCategory.UID);
 
-    registry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerVat.class, VatRecipeCategory.UID, FIRST_RECIPE_SLOT, NUM_RECIPE_SLOT,
+    MachinesPlugin.iModRegistry.addRecipes(VatRecipeManager.getInstance().getRecipes(), UID);
+
+    MachinesPlugin.iModRegistry.getRecipeTransferRegistry().addRecipeTransferHandler(ContainerVat.class, VatRecipeCategory.UID, FIRST_RECIPE_SLOT, NUM_RECIPE_SLOT,
         FIRST_INVENTORY_SLOT, NUM_INVENTORY_SLOT);
   }
 

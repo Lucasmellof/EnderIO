@@ -18,6 +18,7 @@ import crazypants.enderio.base.machine.base.te.AbstractCapabilityMachineEntity;
 import crazypants.enderio.base.machine.base.te.EnergyLogic;
 import crazypants.enderio.base.machine.fakeplayer.FakePlayerEIO;
 import crazypants.enderio.base.paint.IPaintable;
+import crazypants.enderio.base.recipe.RecipeLevel;
 import crazypants.enderio.machines.capacitor.CapacitorKey;
 import crazypants.enderio.util.Prep;
 import info.loenwind.autosave.annotations.Storable;
@@ -45,6 +46,11 @@ public class TileCrafter extends AbstractCapabilityMachineEntity implements IPai
     @Override
     public int getTicksPerCraft() {
       return 20;
+    }
+
+    @Override
+    protected @Nonnull RecipeLevel getMachineLevel() {
+      return RecipeLevel.SIMPLE;
     }
 
   }
@@ -99,12 +105,17 @@ public class TileCrafter extends AbstractCapabilityMachineEntity implements IPai
   }
 
   @Override
+  protected @Nonnull RecipeLevel getMachineLevel() {
+    return RecipeLevel.NORMAL;
+  }
+
+  @Override
   public boolean isActive() {
     return false;
   }
 
   @Override
-  protected boolean processTasks(boolean redstoneCheck) {
+  protected void processTasks(boolean redstoneCheck) {
     ticksSinceLastCraft++;
 
     // process buffered container items
@@ -127,7 +138,7 @@ public class TileCrafter extends AbstractCapabilityMachineEntity implements IPai
     if (redstoneCheck) {
       getEnergy().useEnergy();
     }
-    return super.processTasks(redstoneCheck);
+    super.processTasks(redstoneCheck);
   }
 
   protected int getGuiEnergyUse() {
@@ -263,6 +274,7 @@ public class TileCrafter extends AbstractCapabilityMachineEntity implements IPai
       }
     }
     this.bufferStacks = bufferStacks;
+    markDirty();
   }
 
   public void updateCraftingOutput() {
